@@ -1,0 +1,17 @@
+name: Share a workflow / 使用场景
+description: Tell us what you need to collect and where the current workflow gets stuck.
+body:
+  - type: textarea
+    id: work
+    attributes:
+      label: What are you trying to prepare? / 要整理什么材料？
+      description: Describe the task and how often it happens. No company names or private files needed.
+    validations:
+      required: true
+  - type: textarea
+    id: obstacle
+    attributes:
+      label: What takes the most manual work? / 哪一步最费事？
+      description: A small example of the checklist and file names helps more than a feature list.
+    validations:
+      required: true

@@ -1,0 +1,11 @@
+**/bin/
+**/obj/
+dist/
+artifacts/
+.vs/
+*.user
+*.fctask
+.local/
+delivery*/
+/docs/VALIDATION.md
+/docs/UI-REVISION.md

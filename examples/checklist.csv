@@ -1,0 +1,6 @@
+File,Recipient,Note
+A001_spec.txt,Customer A,Specification
+A002_report.txt,Customer A,Choose approved or draft
+missing_attachment.txt,Customer A,Waiting for attachment
+guide.md,Customer B,User guide
+A001_spec.txt,Customer B,Repeated request stays in the report

@@ -1,0 +1,27 @@
+name: Report a problem / 问题反馈
+description: A file was missed, a candidate was wrong, or an operation failed.
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Version and operating system / 版本与系统
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps and expected result / 操作与预期
+      description: Include the matching mode. Replace private names and paths with fake ones.
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: Minimal checklist and folder layout / 最小示例
+      description: Plain text is enough. Do not attach confidential documents or task snapshots with private paths.
+  - type: textarea
+    id: result
+    attributes:
+      label: What happened / 实际结果
+    validations:
+      required: true

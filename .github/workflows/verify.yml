@@ -1,0 +1,58 @@
+name: Verify and package
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
+        with:
+          dotnet-version: 9.0.x
+      - name: Core and CLI regression
+        if: runner.os == 'Linux'
+        run: dotnet run --project tests/FileChecklist.Tests -c Release
+      - name: Core, CLI and WPF workflow regression
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./tools/test.ps1
+      - name: Package Windows desktop and CLI
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./tools/publish.ps1
+      - name: Package Linux CLI
+        if: runner.os == 'Linux'
+        run: |
+          dotnet publish src/FileChecklist.Cli -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=None -p:DebugSymbols=false -o dist/filechecklist-cli-linux-x64
+          cp README.md LICENSE dist/filechecklist-cli-linux-x64/
+          mkdir -p dist/filechecklist-cli-linux-x64/docs
+          cp docs/CLI.md dist/filechecklist-cli-linux-x64/docs/
+          cp -r examples dist/filechecklist-cli-linux-x64/
+          dist/filechecklist-cli-linux-x64/filechecklist --help
+          tar -czf dist/filechecklist-cli-linux-x64.tar.gz -C dist filechecklist-cli-linux-x64
+      - name: Preserve packages
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: packages-${{ runner.os }}
+          path: |
+            dist/*.zip
+            dist/*.tar.gz
+          retention-days: 14
+          if-no-files-found: error
+      - name: Preserve Windows smoke diagnostics
+        if: always() && runner.os == 'Windows'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: windows-smoke
+          path: artifacts/ui-*/
+          retention-days: 7
