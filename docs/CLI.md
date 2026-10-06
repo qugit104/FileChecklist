@@ -44,7 +44,7 @@ filechecklist plan examples/ids.csv --header --source examples/files --output de
 - `--header`: treat the first nonblank row as a header; otherwise all rows are data.
 - `--delimiter comma|tab`: `.csv` defaults to comma; other extensions default to tab. Input must be UTF-8, optionally with BOM.
 - `--rename-conflicts`: explicitly allow names such as `file (2).txt`. Existing files are never replaced.
-- `--json`: machine-readable rows, candidates, plans, scan errors and copy results. Successful structured output uses English enum names. Error text is plain text; some detailed diagnostics and the CSV report are currently Chinese.
+- `--json`: machine-readable rows, candidates, plans, scan errors and copy results. Structured keys and status identifiers stay English. Built-in diagnostics and CSV report labels follow the process UI culture (Chinese for Chinese locales, English otherwise); error output is plain text. Use JSON status identifiers for automation rather than localized CSV labels. Original request cells remain unchanged.
 
 | Exit | Meaning |
 | --- | --- |

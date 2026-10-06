@@ -4,7 +4,7 @@ Collect files from a spreadsheet checklist. See what's missing, choose between d
 
 [Try in browser](https://qugit104.github.io/FileChecklist/?lang=en) · [中文说明](README.zh-CN.md) · [Download](https://github.com/qugit104/FileChecklist/releases) · [CLI reference](docs/CLI.md) · [Report a problem](https://github.com/qugit104/FileChecklist/issues/new/choose)
 
-![Windows desktop](docs/desktop.png)
+![Windows desktop](docs/desktop-en.png)
 
 ## When this helps
 
@@ -16,7 +16,7 @@ FileChecklist keeps the **requested rows** as the source of truth. It retains no
 
 **No installation:** [open the browser tool](https://qugit104.github.io/FileChecklist/?lang=en). Try the example, paste your own checklist, or select a local folder to compare filenames. Resolve ambiguous matches and export a CSV report. Input stays in the tab; file contents are not read. Copying, SHA-256 checks and saved tasks are available in the desktop / CLI. [Browser limits](docs/BROWSER.md).
 
-**Windows desktop:** download the `FileChecklist-0.2.0-win-x64.zip` release asset, extract it, and run `FileChecklist.exe`. The interface is currently in Chinese. Choose **帮助 → 打开示例**, then **扫描文件** to try an isolated sample. No .NET installation is required.
+**Windows desktop:** download `FileChecklist-0.3.0-win-x64.zip`, extract it, and run `FileChecklist.exe`. Choose **Help → Open sample**, then **Scan files** to try an isolated sample. No .NET installation is required. The UI follows your Windows display language: Chinese for Chinese locales, English otherwise. Run `FileChecklist.exe --lang en` or `--lang zh` to override it; `--demo` opens the sample on launch.
 
 **Command line:** download a CLI package, or build with .NET SDK 9. The included sample contains a duplicate name, a repeated request, and one missing attachment:
 
@@ -53,7 +53,7 @@ Source files are not modified. There is no account, upload service, telemetry or
 - CSV / TSV and pasted Excel cells; direct `.xlsx` import is not implemented.
 - Ordinary local folders. Links and reparse points are skipped and reported; cloud placeholders and network drives are not validated workflows.
 - Flat output directory. No folder structure replication or automatic multi-file selection per row.
-- Desktop UI and CSV diagnostics are currently Chinese. CLI commands and structured status names are English; some detailed error messages remain Chinese.
+- Desktop UI, built-in messages and CSV report labels support English and Simplified Chinese. Operating-system dialogs/errors may follow the OS language. Original task titles, columns, filenames and notes are never translated. CLI command names and JSON status identifiers stay English.
 - Reading matched files for hashing can take time. Large-directory / 100,000-row limits are input guards, not measured performance promises.
 - Windows executable is unsigned. Task snapshots and reports contain local paths; review them before sharing.
 - A correct filename and checksum do not establish that a document is the correct business version.
@@ -67,7 +67,7 @@ dotnet run --project src/FileChecklist.Cli -- --help
 
 On Windows, `powershell -NoProfile -ExecutionPolicy Bypass -File tools/test.ps1` also builds and runs the actual WPF import → scan → choose → preview → copy → restore → supplement flow. `tools/publish.ps1` creates portable Windows packages.
 
-The core and CLI have no third-party NuGet dependencies. CI runs behavior tests on Windows and Linux and packages both command-line targets. [Validation notes](docs/RELEASE-0.2.md) · [Contributing](CONTRIBUTING.md) · [MIT license](LICENSE).
+The core and CLI have no third-party NuGet dependencies. CI runs behavior tests on Windows and Linux and packages both command-line targets. Windows smoke tests exercise both UI languages. [Validation notes](docs/RELEASE-0.3.md) · [Contributing](CONTRIBUTING.md) · [MIT license](LICENSE).
 
 ## Feedback that will shape the next version
 

@@ -1,3 +1,4 @@
+using static FileChecklist.Core.Text;
 namespace FileChecklist.Core;
 
 public enum RowStatus { Unchecked, Ready, Missing, Ambiguous, Changed, Delivered, Error, Invalid }
@@ -24,7 +25,7 @@ public sealed class ChecklistRow
 public sealed class ChecklistTask
 {
     public int Version { get; set; } = 1;
-    public string Title { get; set; } = "新交付任务";
+    public string Title { get; set; } = T("新交付任务");
     public List<string> Headers { get; set; } = [];
     public List<ChecklistRow> Rows { get; set; } = [];
     public List<string> Roots { get; set; } = [];

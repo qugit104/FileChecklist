@@ -1,4 +1,4 @@
-param([string]$AppPath)
+param([string]$AppPath, [ValidateSet('zh','en')][string[]]$Languages = @('zh','en'))
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path $PSScriptRoot -Parent
 Push-Location $projectRoot
@@ -11,8 +11,9 @@ try {
         $AppPath = Join-Path $projectRoot 'src/FileChecklist.Desktop/bin/Release/net9.0-windows/FileChecklist.exe'
     }
     $resolvedApp = (Resolve-Path -LiteralPath $AppPath).Path
-    $smokeOutput = Join-Path $projectRoot ('artifacts/ui-' + [guid]::NewGuid().ToString('N'))
-    $process = Start-Process -FilePath $resolvedApp -ArgumentList @('--smoke', ('"' + $smokeOutput + '"')) -WindowStyle Hidden -PassThru
+    foreach ($language in $Languages) {
+    $smokeOutput = Join-Path $projectRoot ('artifacts/ui-' + $language + '-' + [guid]::NewGuid().ToString('N'))
+    $process = Start-Process -FilePath $resolvedApp -ArgumentList @('--lang', $language, '--smoke', ('"' + $smokeOutput + '"')) -WindowStyle Hidden -PassThru
     if (-not $process.WaitForExit(45000)) { $process.Kill(); throw 'UI smoke timed out after 45 seconds' }
     $process.Refresh()
     $report = Join-Path $smokeOutput 'smoke-result.txt'
@@ -22,4 +23,5 @@ try {
     if (-not $result.StartsWith('PASS:')) { throw $result }
     Write-Output $result
     Write-Output "PASS: UI process exit 0. Artifacts: $smokeOutput"
+    }
 } finally { Pop-Location }

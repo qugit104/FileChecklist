@@ -1,7 +1,35 @@
 using FileChecklist.Core;
 using System.Text;
+using System.Globalization;
+
+// Existing diagnostic assertions exercise Chinese text explicitly; language tests use scoped cultures.
+CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("zh-CN");
 
 var tests = new (string, Action)[] {
+    ("English scan and CSV preserve original multilingual request cells", () => InCulture("en-US", () => InTemp((root, output) => {
+        Put(root,"中文.txt","payload");
+        var task=ChecklistEngine.Import("文件名\t备注\n中文.txt\t001\nmissing.txt\t保留原始文本",'\t',true,0);
+        task.Roots=[root];task.OutputFolder=output;ChecklistEngine.Scan(task);
+        Eq("Missing",ChecklistEngine.StatusText(task.Rows[1].Status));
+        True(task.Rows[1].Detail.Contains("not found",StringComparison.OrdinalIgnoreCase));
+        var result=ChecklistEngine.Deliver(task,ChecklistEngine.Plan(task));
+        var report=ChecklistEngine.ParseTable(File.ReadAllText(result.ReportPath),',');
+        True(report[0].Contains("Status"));True(report[1].Contains("Delivered"));True(report[2].Contains("Missing"));
+        Eq("001",task.Rows[0].Cells[1]);Eq("保留原始文本",task.Rows[1].Cells[1]);Eq("payload",File.ReadAllText(Path.Combine(output,"中文.txt")));
+    }))),
+    ("English core errors flow to background scans", () => InCulture("en-US", () => InTemp((root,output) => {
+        var task=Make(root+"-missing",output,"a.txt");Task.Run(()=>ChecklistEngine.Scan(task)).GetAwaiter().GetResult();
+        True(task.Rows[0].Detail.Contains("incomplete",StringComparison.OrdinalIgnoreCase));
+        try { ChecklistEngine.Import("",',',false,0); throw new Exception("Expected empty-input error"); }
+        catch(FormatException ex) { True(ex.Message.Contains("checklist",StringComparison.OrdinalIgnoreCase)); }
+    }))),
+    ("Chinese task can resume in English without translating user data", () => InTemp((root,output) => {
+        Put(root,"a.txt","payload"); var task=Make(root,output,"a.txt\nmissing.txt\n../secret.txt"); task.Title="客户原始标题";ChecklistEngine.Scan(task);
+        var result=ChecklistEngine.Deliver(task,ChecklistEngine.Plan(task));Eq(1,result.Copied);
+        string saved=Path.Combine(output,"saved.fctask");ChecklistEngine.Save(task,saved);
+        InCulture("en-US",()=>{var loaded=ChecklistEngine.Load(saved);ChecklistEngine.Scan(loaded);Eq("客户原始标题",loaded.Title);Eq(RowStatus.Delivered,loaded.Rows[0].Status);Eq("Delivered",ChecklistEngine.StatusText(loaded.Rows[0].Status));True(loaded.Rows[0].Detail.Contains("verified",StringComparison.OrdinalIgnoreCase));True(loaded.Rows[2].Detail.Contains("folder path",StringComparison.OrdinalIgnoreCase));});
+        Eq("未找到",ChecklistEngine.StatusText(RowStatus.Missing));
+    })),
     ("CSV quoted fields / embedded newlines / BOM", () => {
         var rows = ChecklistEngine.ParseTable("\uFEFFname,note\r\n\"a,b.txt\",\"line1\nline2 \"\"ok\"\"\"\r\n", ',');
         Eq(2, rows.Count); Eq("a,b.txt", rows[1][0]); Eq("line1\nline2 \"ok\"", rows[1][1]);
@@ -166,6 +194,7 @@ return failures==0?0:1;
 static void True(bool value) {if(!value)throw new Exception("Assertion failed");}
 static void Eq<T>(T expected,T actual) {if(!EqualityComparer<T>.Default.Equals(expected,actual))throw new Exception($"Expected {expected}; got {actual}");}
 static void Throws<T>(Action action) where T:Exception {bool caught=false; try{action();}catch(T){caught=true;}True(caught);}
+static void InCulture(string culture,Action action) { var before=CultureInfo.CurrentUICulture;try{CultureInfo.CurrentUICulture=CultureInfo.GetCultureInfo(culture);action();}finally{CultureInfo.CurrentUICulture=before;} }
 static ChecklistTask Make(string root,string output,string names) {var t=ChecklistEngine.Import(names,'\t',false,0);t.Roots=[root];t.OutputFolder=output;return t;}
 static string Put(string root,string relative,string content){var p=Path.Combine(root,relative);Directory.CreateDirectory(Path.GetDirectoryName(p)!);File.WriteAllText(p,content,new UTF8Encoding(false));return p;}
 static void InTemp(Action<string,string> run){var p=Path.Combine(Path.GetTempPath(),"FileChecklistTests",Guid.NewGuid().ToString("N"));Directory.CreateDirectory(Path.Combine(p,"source"));try{run(Path.Combine(p,"source"),Path.Combine(p,"delivery"));}finally{Directory.Delete(p,true);}}

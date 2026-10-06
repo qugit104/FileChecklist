@@ -14,7 +14,7 @@ Windows 本地桌面工具。粘贴文件名和备注，递归查找文件；处
 
 **先试用，不用安装：**[打开网页版](https://qugit104.github.io/FileChecklist/?lang=zh)，直接查看示例，或粘贴自己的清单、选择本地文件夹，核对缺件和重名并导出 CSV 报告。输入留在当前标签页，不读取文件内容。复制、校验和保存任务请使用桌面版或命令行版。[网页版限制与验证](docs/BROWSER.md)。
 
-从 Releases 下载 `FileChecklist-0.2.0-win-x64.zip`，解压后双击 `FileChecklist.exe`，无需安装 .NET。当前桌面版面向 Windows 10/11 x64；尚未逐个系统版本验证。另有 Windows / Linux 命令行版。
+从 Releases 下载 `FileChecklist-0.3.0-win-x64.zip`，解压后双击 `FileChecklist.exe`，无需安装 .NET。中文系统默认中文，其它语言系统默认英文；可以通过 `FileChecklist.exe --lang zh` 或 `--lang en` 指定语言，附加 `--demo` 可直接打开示例。当前桌面版面向 Windows 10/11 x64；尚未逐个系统版本验证。另有 Windows / Linux 命令行版。
 
 1. 点 **导入清单…**：直接粘贴 Excel 多列数据，也可导入 CSV / TSV。指定文件名列；没有表头时取消“第一行是表头”。示例在 **帮助 → 打开示例**。
 2. 导入时选择匹配规则：完整文件名、不含扩展名或编号前缀。添加查找位置后点 **扫描文件**。选中“待选择”行，核对文件位置后点 **使用选中文件**。编号前缀的候选即使只有一个，也需要确认。
@@ -33,6 +33,7 @@ Windows 本地桌面工具。粘贴文件名和备注，递归查找文件；处
 - 选中文件记录 SHA-256；复制时核对内容变化并校验副本，保留源文件。
 - UTF-8 BOM CSV 报告：原清单列、每行状态、源路径、交付路径与校验值。
 - 保存 / 恢复任务、自动恢复副本、重新核对后补交新增文件。
+- 中英文界面、内置提示和报告列名；原始文件名、任务标题、清单列与备注保持原文。系统文件选择窗口和底层系统错误可能使用操作系统语言。
 - 后台扫描与复制，可以取消；已完成的副本保留，未完成的临时副本清理。
 
 无需登录，不上传文件，无在线服务。
@@ -59,12 +60,12 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools/test.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File tools/publish.ps1
 ```
 
-`test.ps1` 运行核心回归、构建，并启动真实 WPF 窗口完成导入、核对、交付、恢复与补件流程。测试数据及恢复设置隔离在临时目录 / `artifacts`，不会读取用户任务。
+`test.ps1` 运行核心回归、构建，并分别以中英文启动真实 WPF 窗口，完成导入、核对、交付、恢复与补件流程。测试数据及恢复设置隔离在临时目录 / `artifacts`，不会读取用户任务。
 
 - `src/FileChecklist.Core`：解析、匹配、状态、复制、校验、报告与任务持久化。
 - `src/FileChecklist.Desktop`：WPF 界面及可运行的窗口流程测试。
 - `src/FileChecklist.Cli`：命令行预览、确认、复制与补件，[用法](docs/CLI.md)。
 - `tests/FileChecklist.Tests`：无外部测试框架依赖的行为回归。
-- [0.2 验证记录](docs/RELEASE-0.2.md)。
+- [0.3 验证记录](docs/RELEASE-0.3.md)。
 
 当前为早期版本。欢迎用虚构的文件名和目录结构反馈具体问题，不需要上传真实业务材料。
