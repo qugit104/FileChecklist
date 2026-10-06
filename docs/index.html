@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Check a spreadsheet list against local filenames. Find missing files, resolve duplicate names, and export a row-by-row CSV report. Runs in your browser, without uploads.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>FileChecklist — Check a spreadsheet against your files</title>
+  <link rel="stylesheet" href="web/style.css">
+  <script type="module" src="web/app.mjs"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./">FileChecklist</a>
+    <nav aria-label="Main">
+      <a href="https://github.com/qugit104/FileChecklist/releases" data-i18n="download">Download</a>
+      <a href="https://github.com/qugit104/FileChecklist">GitHub</a>
+      <button id="language" type="button" lang="zh-CN">中文</button>
+    </nav>
+  </header>
+  <main>
+    <h1 data-i18n="title">Which files are missing from your list?</h1>
+    <p class="intro" data-i18n="intro">Paste a checklist from Excel and compare it with filenames from a folder. Keep every requested row, including duplicates and notes.</p>
+    <p class="privacy" data-i18n="privacy">Runs in this tab. No account or upload. Folder selection uses filenames only; file contents are not read.</p>
+    <div class="inputs">
+      <section aria-labelledby="checklist-heading">
+        <div class="section-head"><label id="checklist-heading" for="checklist" data-i18n="listTitle">1. Requested files</label><button id="example" type="button" data-i18n="example">Load example</button></div>
+        <textarea id="checklist" spellcheck="false" wrap="off" aria-describedby="checklist-help" maxlength="2000000"></textarea>
+        <p id="checklist-help" class="hint" data-i18n="listHint">Paste cells from Excel, or CSV text. Your original columns stay in the report.</p>
+        <div class="options">
+          <label><span data-i18n="delimiter">Separator</span><select id="delimiter"><option value="auto" data-i18n="auto">Auto</option><option value="tab" data-i18n="tab">Tab</option><option value="comma" data-i18n="comma">Comma</option></select></label>
+          <label><span data-i18n="column">Filename column</span><input id="column" type="number" min="1" max="1000" value="1"></label>
+          <label class="checkbox"><input id="header" type="checkbox" checked><span data-i18n="header">First row is a header</span></label>
+        </div>
+      </section>
+      <section aria-labelledby="files-heading">
+        <div class="section-head"><label id="files-heading" for="paths" data-i18n="filesTitle">2. Available files</label><button id="folder" type="button" data-i18n="folder">Choose folder…</button></div>
+        <input id="folder-input" type="file" webkitdirectory multiple hidden>
+        <textarea id="paths" spellcheck="false" wrap="off" aria-describedby="paths-help" maxlength="2000000"></textarea>
+        <p id="paths-help" class="hint" data-i18n="filesHint">One file path per line, including extensions. Different folders distinguish same-name files.</p>
+        <div class="options">
+          <label class="mode-label"><span data-i18n="mode">Match by</span><select id="mode"><option value="exact" data-i18n="exact">Complete filename</option><option value="stem" data-i18n="stem">Name without extension</option><option value="prefix" data-i18n="prefix">Document ID prefix</option></select></label>
+        </div>
+      </section>
+    </div>
+    <div class="run-line"><button id="check" class="primary" type="button" data-i18n="check">Check list</button><span id="input-state" class="hint" aria-live="polite"></span></div>
+    <p id="error" role="alert" hidden></p>
+    <section id="results" aria-labelledby="results-heading" hidden>
+      <div class="results-head"><h2 id="results-heading" data-i18n="results">Results</h2><p id="summary" role="status"></p><button id="export" type="button" data-i18n="export">Export CSV report</button></div>
+      <div class="filter-line"><label><span data-i18n="show">Show</span><select id="filter"><option value="all" data-i18n="all">All rows</option><option value="Missing" data-i18n="Missing">Missing</option><option value="Ambiguous" data-i18n="Ambiguous">Needs a choice</option><option value="Ready" data-i18n="Ready">Matched</option><option value="Invalid" data-i18n="Invalid">Invalid request</option></select></label><span id="visible-count" class="hint"></span></div>
+      <div class="table-scroll" tabindex="0" role="region" aria-label="Checklist results"><table><thead><tr><th scope="col">#</th><th scope="col" data-i18n="requested">Requested</th><th scope="col" data-i18n="status">Status</th><th scope="col" data-i18n="original">Other columns</th><th scope="col" data-i18n="matchedPath">Matched file / choice</th></tr></thead><tbody id="result-rows"></tbody></table></div>
+      <section id="review" class="review" aria-labelledby="review-heading" hidden>
+        <div class="section-head"><h3 id="review-heading"></h3><button id="close-review" type="button" data-i18n="close">Close</button></div>
+        <p class="hint" data-i18n="reviewHelp">Check the full path before choosing. The name alone cannot tell you which document version is correct.</p>
+        <label class="candidate-filter"><span data-i18n="pathFilter">Filter candidate paths</span><input id="candidate-filter" type="search"></label>
+        <label for="candidates" data-i18n="candidates">Candidates</label><select id="candidates" size="5"></select>
+        <p id="candidate-count" class="hint"></p>
+        <button id="confirm" class="primary" type="button" data-i18n="confirm">Use selected path</button>
+      </section>
+      <p class="hint" data-i18n="reportHint">The report includes all rows and your choices. It checks names, not file contents. Leading zeros remain text in the CSV; import columns as text in Excel.</p>
+      <section id="report" class="review" aria-labelledby="report-heading" hidden>
+        <div class="section-head"><h3 id="report-heading" data-i18n="reportTitle">CSV report</h3><a id="report-download" download="filechecklist-report.csv" data-i18n="saveReport">Download .csv</a></div>
+        <p class="hint" data-i18n="saveHint">If your browser blocks downloads, copy the text below into a UTF-8 .csv file.</p>
+        <label for="report-text" data-i18n="reportText">All report rows</label><textarea id="report-text" readonly spellcheck="false" wrap="off"></textarea>
+      </section>
+    </section>
+    <section class="help" aria-labelledby="next-heading">
+      <h2 id="next-heading" data-i18n="next">Need to collect the actual files?</h2>
+      <p data-i18n="nextBody">The desktop and command-line tools copy confirmed files, verify them with SHA-256, and save a task so you can add missing files later. This browser tool only checks names and exports a report; it does not copy files or save a task.</p>
+      <p><a href="https://github.com/qugit104/FileChecklist/releases" data-i18n="getTool">Download for Windows / Linux CLI</a><span class="separator">·</span><a href="https://github.com/qugit104/FileChecklist#match-names-or-ids" data-i18n="rules">Matching rules</a><span class="separator">·</span><a href="https://github.com/qugit104/FileChecklist/issues/new?template=workflow.yml" data-i18n="feedback">Share a workflow</a></p>
+      <details><summary data-i18n="limits">Browser limits and privacy</summary><p data-i18n="limitsBody">Up to 20,000 checklist rows, 100,000 file paths, and 2 million characters per text box. These are input limits, not performance guarantees. Only 500 rows are displayed at once; the CSV contains all results. Folder selection depends on your browser. You can always paste paths instead. Changes stay in memory and disappear when this tab closes. The hosting provider receives normal page requests; your pasted text and selected files are not sent to a server.</p></details>
+    </section>
+  </main>
+  <footer>FileChecklist <span class="separator">·</span> <a href="https://github.com/qugit104/FileChecklist/blob/main/LICENSE">MIT</a> <span class="separator">·</span> <a href="https://github.com/qugit104/FileChecklist/tree/main/docs/web" data-i18n="source">View source</a></footer>
+  <noscript>This tool needs JavaScript to check filenames locally. You can also download FileChecklist from GitHub.</noscript>
+</body>
+</html>

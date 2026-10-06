@@ -1,0 +1,93 @@
+:root { color-scheme: light; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif; color: #222b34; background: #fafbfc; font-size: 14px; line-height: 1.55; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+button, input, select, textarea { font: inherit; }
+button, select, input { min-height: 34px; }
+button { cursor: pointer; padding: 5px 12px; border: 1px solid #b8c1ca; border-radius: 3px; background: #fff; color: #263746; white-space: nowrap; }
+button:hover { background: #eef2f6; border-color: #8898a8; }
+button:disabled { cursor: default; color: #8a9199; background: #f3f4f5; }
+button.primary { color: white; border-color: #285e8e; background: #285e8e; }
+button.primary:hover { background: #1e4c75; }
+button.primary:disabled { background: #7a94ab; border-color: #7a94ab; }
+a { color: #245d91; text-underline-offset: 3px; }
+a:hover { color: #123853; }
+:focus-visible { outline: 2px solid #1675c4; outline-offset: 3px; }
+[hidden] { display: none !important; }
+.topbar { background: #fff; border-bottom: 1px solid #dbe1e6; display: flex; justify-content: space-between; align-items: center; padding: 14px max(24px, calc((100vw - 1160px) / 2)); gap: 16px; }
+.brand { color: #222b34; text-decoration: none; font-size: 19px; font-weight: 650; letter-spacing: -.4px; }
+nav { display: flex; align-items: center; gap: 20px; }
+nav a { text-decoration: none; }
+nav button { padding: 3px 9px; font-size: 13px; }
+main { max-width: 1160px; margin: 0 auto; padding: 30px 0 0; }
+h1 { font-size: 26px; font-weight: 650; line-height: 1.3; margin: 0 0 10px; letter-spacing: -.5px; }
+h2 { font-size: 17px; font-weight: 650; margin: 0; }
+h3 { font-size: 15px; font-weight: 650; margin: 0; overflow-wrap: anywhere; }
+p { margin: 8px 0; }
+.intro { max-width: 860px; color: #45525e; }
+.privacy { color: #5e6d63; font-size: 13px; margin: 8px 0 25px; }
+.inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.inputs section { min-width: 0; }
+.section-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; }
+.section-head > label { font-weight: 650; font-size: 15px; }
+textarea { display: block; width: 100%; min-height: 192px; padding: 12px; resize: vertical; border: 1px solid #b8c1ca; border-radius: 3px; background: #fff; font-family: ui-monospace, Consolas, monospace; font-size: 13px; line-height: 1.7; tab-size: 3; }
+.hint { font-size: 12px; color: #626c77; }
+.inputs .hint { min-height: 38px; margin-top: 7px; }
+.options { display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; }
+.options label { display: flex; flex-direction: column; gap: 3px; font-size: 12px; }
+input, select { border: 1px solid #b8c1ca; border-radius: 3px; color: #273747; background: #fff; padding: 4px 7px; max-width: 100%; }
+input[type="number"] { width: 78px; }
+input[type="checkbox"] { min-height: auto; width: 16px; height: 16px; margin: 0; accent-color: #285e8e; }
+.options .checkbox { flex-direction: row; align-items: center; gap: 7px; padding-bottom: 8px; }
+.mode-label select { min-width: 240px; }
+.run-line { display: flex; align-items: center; gap: 14px; margin: 24px 0; min-height: 36px; }
+#error { padding: 10px 14px; background: #fff4f3; border-left: 3px solid #ac463d; color: #8b2922; }
+#results { border-top: 1px solid #d6dde3; padding-top: 18px; }
+.results-head { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+#summary { flex: 1; margin: 0; font-size: 13px; }
+.filter-line { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 13px 0 10px; }
+.filter-line label { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.table-scroll { overflow-x: auto; background: white; border: 1px solid #d4dce3; border-radius: 3px; }
+table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+th { background: #f0f3f5; font-weight: 600; color: #4b5661; }
+th, td { padding: 9px 12px; border-bottom: 1px solid #e5e9ed; vertical-align: top; }
+th { white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+td:first-child { color: #7a848f; width: 40px; }
+td:nth-child(2) { min-width: 150px; overflow-wrap: anywhere; }
+td:nth-child(3) { white-space: nowrap; }
+td:nth-child(4) { min-width: 120px; white-space: pre-wrap; overflow-wrap: anywhere; }
+td:last-child { min-width: 220px; max-width: 430px; }
+.path { display: block; font-family: ui-monospace, Consolas, monospace; font-size: 12px; overflow-wrap: anywhere; margin: 0 0 4px; }
+.row-action { padding: 2px 8px; min-height: 27px; font-size: 12px; }
+.status-Ready { color: #27674d; }
+.status-Missing { color: #a04435; }
+.status-Ambiguous { color: #8a611a; }
+.status-Invalid { color: #9b3f3f; }
+.review { margin: 14px 0; padding: 14px 18px; border-left: 3px solid #7896ae; background: #edf2f6; }
+.candidate-filter { display: flex; flex-direction: column; max-width: 600px; gap: 4px; margin: 12px 0; font-size: 12px; }
+#candidates { display: block; width: 100%; border-radius: 0; font-family: ui-monospace, Consolas, monospace; font-size: 13px; margin-top: 5px; }
+#candidates option { padding: 6px; }
+.help { margin-top: 36px; padding: 22px 0; border-top: 1px solid #d6dde3; color: #4c5965; font-size: 13px; }
+.help h2 { color: #273541; }
+.help > p { max-width: 910px; }
+.separator { color: #8a939c; margin: 0 8px; }
+details { margin-top: 14px; font-size: 12px; max-width: 970px; }
+summary { cursor: pointer; }
+footer { max-width: 1160px; margin: 0 auto; padding: 14px 0 28px; font-size: 12px; color: #7c858d; }
+@media (max-width: 1210px) { main, footer { margin-left: 24px; margin-right: 24px; } }
+@media (max-width: 720px) {
+  .topbar { padding: 12px 16px; gap: 10px; }
+  .brand { font-size: 17px; }
+  nav { gap: 12px; font-size: 12px; }
+  main { padding-top: 24px; }
+  main, footer { margin-left: 16px; margin-right: 16px; }
+  h1 { font-size: 23px; }
+  .inputs { grid-template-columns: 1fr; gap: 24px; }
+  textarea { min-height: 165px; }
+  .inputs .hint { min-height: auto; }
+  .options { gap: 10px; margin-top: 12px; }
+  .results-head { gap: 10px; }
+  #summary { flex-basis: calc(100% - 90px); }
+  .results-head button { margin-top: 5px; }
+  .filter-line { flex-wrap: wrap; gap: 5px; }
+}
