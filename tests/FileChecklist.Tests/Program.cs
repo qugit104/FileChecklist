@@ -6,6 +6,30 @@ using System.Globalization;
 CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("zh-CN");
 
 var tests = new (string, Action)[] {
+    ("XLSX reads sheets, displayed IDs, notes, duplicates and cached formulas", () => {
+        var sheets=SpreadsheetImport.Read(Path.Combine(AppContext.BaseDirectory,"fixtures","checklist.xlsx"));
+        Eq(2,sheets.Count);Eq("交付清单",sheets[0].Name);Eq("0007",sheets[0].Rows[1][2]);Eq("已保存结果",sheets[0].Rows[1][3]);
+        Eq("合同.pdf",sheets[0].Rows[4][1]);Eq("两行\n备注，保留原文",sheets[0].Rows[5][0]);
+        var rows=ChecklistEngine.ParseTable(SpreadsheetImport.ToText(sheets[0].Rows),'\t');Eq(6,rows.Count);Eq(sheets[0].Rows[5][0],rows[5][0]);
+    }),
+    ("XLSX suggested column scans and copies requested files with original rows", () => InTemp((root,output) => {
+        var sheet=SpreadsheetImport.Read(Path.Combine(AppContext.BaseDirectory,"fixtures","checklist.xlsx"))[0];
+        var guess=SpreadsheetImport.Suggest(sheet.Rows);Eq(true,guess.HasHeader);Eq(1,guess.NameColumn);
+        var t=ChecklistEngine.Import(SpreadsheetImport.ToText(sheet.Rows),'\t',guess.HasHeader,guess.NameColumn);
+        Put(root,"合同.pdf","contract");Put(root,"盖章/报价单.pdf","approved");Put(root,"草稿/报价单.pdf","draft");Put(root,"附件.txt","attachment");
+        t.Roots=[root];t.OutputFolder=output;ChecklistEngine.Scan(t);Eq(5,t.Rows.Count);Eq(RowStatus.Ambiguous,t.Rows[1].Status);Eq(RowStatus.Missing,t.Rows[2].Status);
+        var r=ChecklistEngine.Deliver(t,ChecklistEngine.Plan(t));Eq(2,r.Copied);Eq(1,r.Reused);Eq("0007",t.Rows[0].Cells[2]);
+    })),
+    ("Import suggestions never silently discard headerless first filenames", () => {
+        Eq(new ImportGuess(false,0),SpreadsheetImport.Suggest([["合同.pdf"],["报价单.pdf"]]));
+        Eq(new ImportGuess(true,1),SpreadsheetImport.Suggest([["Notes","Filename"],["001","a.txt"]]));
+        Eq(false,SpreadsheetImport.Suggest([["可能是文件"],["a.txt"]]).HasHeader);
+    }),
+    ("Invalid workbook and oversized input fail without altering the source", () => InTemp((root,output) => {
+        var file=Put(root,"broken.xlsx","hello");Throws<InvalidDataException>(()=>SpreadsheetImport.Read(file));Eq("hello",File.ReadAllText(file));
+        using(var stream=File.Create(file))stream.SetLength(16_000_001);
+        Throws<InvalidDataException>(()=>SpreadsheetImport.Read(file));Eq(16_000_001L,new FileInfo(file).Length);
+    })),
     ("English scan and CSV preserve original multilingual request cells", () => InCulture("en-US", () => InTemp((root, output) => {
         Put(root,"中文.txt","payload");
         var task=ChecklistEngine.Import("文件名\t备注\n中文.txt\t001\nmissing.txt\t保留原始文本",'\t',true,0);
@@ -188,7 +212,7 @@ var tests = new (string, Action)[] {
     }))
 };
 int failures=0;
-foreach(var (name,run) in tests) { try {run(); Console.WriteLine("PASS "+name);} catch(Exception ex){failures++; Console.WriteLine("FAIL "+name+": "+ex.Message);} }
+foreach(var (name,run) in tests) { try {run(); Console.WriteLine("PASS "+name);} catch(Exception ex){failures++; Console.WriteLine("FAIL "+name+": "+ex);} }
 Console.WriteLine($"TOTAL {tests.Length}; PASS {tests.Length-failures}; FAIL {failures}");
 return failures==0?0:1;
 static void True(bool value) {if(!value)throw new Exception("Assertion failed");}

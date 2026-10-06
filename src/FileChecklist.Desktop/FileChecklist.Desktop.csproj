@@ -1,4 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup><OutputType>WinExe</OutputType><TargetFramework>net9.0-windows</TargetFramework><UseWPF>true</UseWPF><AssemblyName>FileChecklist</AssemblyName><Version>0.3.0</Version></PropertyGroup>
+  <PropertyGroup><OutputType>WinExe</OutputType><TargetFramework>net9.0-windows</TargetFramework><UseWPF>true</UseWPF><AssemblyName>FileChecklist</AssemblyName><Version>0.4.0</Version></PropertyGroup>
   <ItemGroup><ProjectReference Include="../FileChecklist.Core/FileChecklist.Core.csproj" /></ItemGroup>
-</Project>
+<ItemGroup><None Include="../../tests/fixtures/checklist.xlsx" Link="fixtures/checklist.xlsx" CopyToOutputDirectory="PreserveNewest" /></ItemGroup></Project>

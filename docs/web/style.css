@@ -91,3 +91,31 @@ footer { max-width: 1160px; margin: 0 auto; padding: 14px 0 28px; font-size: 12p
   .results-head button { margin-top: 5px; }
   .filter-line { flex-wrap: wrap; gap: 5px; }
 }
+
+/* Keep the first screen about the user's two inputs, with details on demand. */
+:root { background: #f7f7f5; color: #272b2d; }
+main { max-width: 1080px; padding-top: 40px; }
+.page-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+h1 { font-size: 28px; letter-spacing: 0; }
+.intro { max-width: 730px; }
+.privacy { margin-bottom: 28px; }
+.input-panel { padding: 22px; background: #fff; border: 1px solid #d9dddf; border-radius: 6px; }
+.input-action { display: flex; gap: 8px; margin: 18px 0 12px; flex-wrap: wrap; }
+.inputs .hint { min-height: 0; }
+.inputs details { margin-top: 16px; font-size: 13px; }
+.inputs details .options { margin-top: 12px; }
+.inputs textarea { min-height: 125px; margin-top: 10px; }
+.inputs details summary { color: #55616b; }
+.list-preview { overflow: auto; max-height: 200px; margin-top: 12px; border: 1px solid #e0e3e5; }
+.list-preview table { font-size: 12px; }
+.list-preview td { min-width: 90px; color: #343c42; max-width: 200px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.list-preview td:first-child { width: auto; }
+.list-preview th, .list-preview td { padding: 7px 9px; }
+#sheet-label { display: flex; align-items: center; gap: 10px; font-size: 12px; margin: 12px 0; }
+#column { max-width: 220px; }
+#results { margin-top: 30px; }
+.run-line { margin-bottom: 20px; }
+.run-line .primary { padding: 8px 24px; }
+.help { margin-top: 28px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+@media (max-width: 720px) { .page-heading { flex-direction: column; gap: 8px; } main { padding-top: 24px; } .input-panel { padding: 18px; } .inputs { gap: 16px; } }

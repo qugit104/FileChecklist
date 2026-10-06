@@ -1,42 +1,133 @@
 import { parseTable, audit, reportCsv, limits } from './engine.mjs';
+import { suggest, toText } from './import.mjs';
 
 const $ = id => document.getElementById(id);
 const english = Object.fromEntries([...document.querySelectorAll('[data-i18n]')].map(el => [el.dataset.i18n, el.textContent]));
 Object.assign(english, {
-  sample: 'Example data · edit either box to try your own list', stale: 'Inputs changed. Check the list again.', checked: 'Checked locally in this tab',
-  review: 'Review', change: 'Change choice', missingHelp: 'No matching filename', invalidHelp: 'Use a filename or ID, without a folder path',
-  chooseHelp: 'Choose a path to confirm this row', needs: '{count} candidate(s)', row: 'Row {number}: {name}',
-  counts: '{total} rows · {ready} matched · {missing} missing · {ambiguous} need a choice · {invalid} invalid',
-  showing: 'Showing {shown} of {total} rows. Export includes every row.', candidateCount: 'Showing {shown} of {total} candidates. Filter the paths to narrow the list.',
-  folderLoaded: '{count} filenames loaded. Click Check list.', working: 'Checking…', csv: 'filechecklist-report.csv',
-  noRows: 'No rows in this view.', columnName: 'Column {number}', folderUnsupported: 'This browser does not support folder selection. Paste file paths instead.',
-  browserError: 'Unable to check this input.', empty: 'Paste at least one requested file.',
+  "sample": "Example",
+  "stale": "Check again",
+  "checked": "Complete",
+  "review": "Select file",
+  "change": "Change",
+  "missingHelp": "No matching file",
+  "invalidHelp": "Enter a filename or ID without a folder path",
+  "chooseHelp": "Select a file",
+  "needs": "{count} files",
+  "row": "Row {number}: {name}",
+  "counts": "{total} rows · {ready} found · {missing} missing · {ambiguous} to confirm · {invalid} invalid",
+  "showing": "{shown} / {total} rows",
+  "candidateCount": "{shown} / {total} files",
+  "folderLoaded": "{count} files",
+  "working": "Checking…",
+  "csv": "filechecklist-report.csv",
+  "noRows": "No rows",
+  "columnName": "Column {number}",
+  "folderUnsupported": "Folder selection is unavailable. Paste file paths instead.",
+  "browserError": "Unable to check this input.",
+  "empty": "Add a checklist.",
+  "attention": "Needs attention",
+  "start": "Ready",
+  "recognition": "{rows} rows · Column: {column}",
+  "folderCount": "{count} files",
+  "reading": "Opening…",
+  "fileError": "Choose .xlsx, CSV or TSV. Convert .xls to .xlsx first.",
+  "importError": "Unable to open this file. Save it as an unencrypted .xlsx and try again.",
+  "needFolder": "Select a folder or paste file paths.",
+  "noRequests": "Empty worksheet.",
+  "exampleSource": "Example checklist"
 });
 const chinese = {
-  download: '下载', title: '清单上的文件，都齐了吗？',
-  intro: '粘贴 Excel 清单，对照文件夹里的文件名。逐行找出缺件和重名，保留重复请求与备注。',
-  privacy: '在当前浏览器内运行，无需账号、不上传数据。选择文件夹只使用文件名，不读取文件内容。',
-  listTitle: '1. 需要哪些文件', example: '载入示例', listHint: '直接粘贴 Excel 单元格，或 CSV 文本。原始列会保留在报告中。',
-  delimiter: '分隔符', auto: '自动判断', tab: '制表符', comma: '逗号', column: '文件名所在列', header: '第一行是表头',
-  filesTitle: '2. 已有哪些文件', folder: '选择文件夹…', filesHint: '每行一个文件路径，带扩展名。相同文件名用不同的文件夹路径区分。',
-  mode: '匹配方式', exact: '完整文件名', stem: '不含扩展名', prefix: '文件编号前缀', check: '核对清单', results: '核对结果',
-  export: '导出 CSV 报告', show: '显示', all: '全部行', Missing: '缺件', Ambiguous: '待选择', Ready: '已匹配', Invalid: '清单有误',
-  requested: '请求文件', status: '状态', original: '其它原始列', matchedPath: '匹配文件 / 选择', close: '关闭',
-  reviewHelp: '选择前核对完整路径。文件名本身不能保证文档的业务版本正确。', pathFilter: '筛选候选路径', candidates: '候选文件', confirm: '使用选中路径',
-  reportHint: '报告保留全部行和选择结果，只核对名称，不检查内容。CSV 中状态使用英文；前导零保留为原始文本，Excel 导入时请将对应列设为文本。',
-  next: '还需要把文件收集到一起？',
-  nextBody: '桌面版和命令行版可以复制已确认文件、用 SHA-256 校验，并保存任务，方便以后补交缺件。此网页只核对名称并导出报告，不复制文件，也不保存任务。',
-  getTool: '下载 Windows 桌面版 / Linux 命令行版', rules: '匹配规则', feedback: '反馈实际使用场景', limits: '网页限制与隐私说明',
-  limitsBody: '最多 20,000 行清单、100,000 个文件路径，每个文本框最多 200 万字符。这是输入上限，不是性能承诺。界面一次显示前 500 行，CSV 导出全部结果。文件夹选择取决于浏览器支持，也可以手动粘贴路径。内容只保存在内存中，关闭标签页后消失。网站托管商会收到常规页面请求；粘贴内容和所选文件不会发送到服务器。',
-  source: '查看源码', sample: '当前是示例数据 · 修改文本即可核对自己的清单', stale: '输入已修改，请重新核对。', checked: '已在当前浏览器内完成核对',
-  reportTitle: 'CSV 报告', saveReport: '下载 .csv 文件', saveHint: '如果浏览器阻止下载，可复制下方文本，保存为 UTF-8 编码的 .csv 文件。', reportText: '全部报告行',
-  review: '选择文件', change: '更改选择', missingHelp: '没有找到匹配的文件名', invalidHelp: '请输入文件名或编号，不要包含文件夹路径',
-  chooseHelp: '选择一个路径以确认此行', needs: '{count} 个候选', row: '第 {number} 行：{name}',
-  counts: '{total} 行 · {ready} 已匹配 · {missing} 缺件 · {ambiguous} 待选择 · {invalid} 清单有误',
-  showing: '显示 {shown} / {total} 行，导出包含所有行。', candidateCount: '显示 {shown} / {total} 个候选，可通过路径筛选缩小范围。',
-  folderLoaded: '已读入 {count} 个文件名，请点击核对清单。', working: '核对中…', csv: '清单核对报告.csv',
-  noRows: '当前筛选没有结果。', columnName: '原始列 {number}', folderUnsupported: '当前浏览器不支持选择文件夹，请直接粘贴文件路径。',
-  browserError: '无法核对此输入。', empty: '请先粘贴至少一个请求文件。',
+  "download": "下载",
+  "title": "文件清单核对",
+  "intro": "按 Excel 清单查找文件，导出核对结果。",
+  "listTitle": "1. 清单",
+  "example": "示例",
+  "listHint": "粘贴 Excel 单元格或 CSV 文本。",
+  "delimiter": "分隔符",
+  "auto": "自动",
+  "tab": "制表符",
+  "comma": "逗号",
+  "column": "文件名列",
+  "header": "首行为表头",
+  "filesTitle": "2. 文件夹",
+  "folder": "选择文件夹…",
+  "filesHint": "每行一个文件路径。",
+  "mode": "匹配方式",
+  "exact": "完整文件名",
+  "stem": "不含扩展名",
+  "prefix": "编号前缀",
+  "check": "核对",
+  "results": "核对结果",
+  "export": "导出 CSV",
+  "show": "显示",
+  "all": "全部",
+  "Missing": "未找到",
+  "Ambiguous": "待确认",
+  "Ready": "已找到",
+  "Invalid": "格式错误",
+  "requested": "文件名",
+  "status": "状态",
+  "original": "其他列",
+  "matchedPath": "文件路径",
+  "close": "关闭",
+  "reviewHelp": "选择要使用的文件。",
+  "pathFilter": "筛选路径",
+  "candidates": "候选文件",
+  "confirm": "选择此文件",
+  "reportHint": "导出包含全部行。",
+  "next": "Windows 桌面版",
+  "nextBody": "复制文件、保存任务、继续补件。",
+  "getTool": "下载",
+  "rules": "匹配规则",
+  "feedback": "反馈",
+  "limits": "使用说明",
+  "limitsBody": "Excel 文件上限 16 MB，清单上限 20000 行，文件路径上限 100000 个，每个文本框上限 200 万字符。表格最多显示 500 行，报告导出全部行。数据在浏览器内处理，刷新或关闭页面后清空。用 Excel 打开 CSV 时，将编号列设为文本可保留前导零。",
+  "source": "源码",
+  "sample": "示例",
+  "stale": "待重新核对",
+  "checked": "核对完成",
+  "reportTitle": "CSV 报告",
+  "saveReport": "下载 CSV",
+  "saveHint": "复制下方文本，或下载 CSV 文件。",
+  "reportText": "CSV 内容",
+  "review": "选择文件",
+  "change": "更改",
+  "missingHelp": "未找到匹配文件",
+  "invalidHelp": "填写文件名或编号，不含文件夹路径",
+  "chooseHelp": "选择文件",
+  "needs": "{count} 个文件",
+  "row": "第 {number} 行：{name}",
+  "counts": "{total} 项 · {ready} 已找到 · {missing} 未找到 · {ambiguous} 待确认 · {invalid} 格式错误",
+  "showing": "显示 {shown} / {total} 行",
+  "candidateCount": "显示 {shown} / {total} 个文件",
+  "folderLoaded": "{count} 个文件",
+  "working": "核对中…",
+  "csv": "清单核对报告.csv",
+  "noRows": "无结果",
+  "columnName": "第 {number} 列",
+  "folderUnsupported": "浏览器不支持选择文件夹，请粘贴文件路径。",
+  "browserError": "无法核对此输入。",
+  "empty": "请导入清单。",
+  "openList": "打开 Excel / CSV…",
+  "pasteList": "粘贴清单",
+  "dropHint": "拖入 .xlsx 文件",
+  "sheet": "工作表",
+  "editList": "编辑清单",
+  "adjust": "导入设置",
+  "folderHint": "包含子文件夹。",
+  "editPaths": "文件路径",
+  "nameOptions": "匹配选项",
+  "prefixHelp": "按编号匹配后需确认文件。",
+  "attention": "待处理",
+  "start": "待核对",
+  "recognition": "{rows} 行 · 文件名列：{column}",
+  "folderCount": "{count} 个文件",
+  "reading": "读取中…",
+  "fileError": "请选择 .xlsx、CSV 或 TSV。旧版 .xls 请先另存为 .xlsx。",
+  "importError": "无法打开文件，请另存为未加密的 .xlsx 后重试。",
+  "needFolder": "请选择文件夹或粘贴文件路径。",
+  "noRequests": "工作表为空。",
+  "exampleSource": "示例清单"
 };
 const errorTranslations = {
   'The checklist exceeds 2,000,000 characters. Split it into smaller lists.': '清单超过 200 万字符，请分批处理。',
@@ -54,6 +145,14 @@ let language = (new URLSearchParams(location.search).get('lang') ?? navigator.la
 let rows = [], headers = [], reviewRow = null, example = false, hasResults = false;
 let stateKey = '', stateValues = {};
 let reportUrl = null;
+Object.assign(errorTranslations, {
+  'Use an Excel file smaller than 16 MB.': '请使用小于 16 MB 的 Excel 文件。',
+  'Use an unencrypted .xlsx file saved by Excel.': '请用 Excel 另存为未加密的 .xlsx 文件后重试。',
+  'Use a workbook with 1 to 100 sheets.': '请将工作表数量控制在 1 到 100 个。',
+  'Keep each sheet within 20,000 rows and 512 columns.': '每个工作表请控制在 20000 行、512 列以内。',
+  'The checklist exceeds 2,000,000 characters.': '清单内容过多，请拆成较小的表格。',
+});
+let workbook = [], listName = '', importSerial = 0, reading = false;
 const t = (key, values = {}) => (language === 'zh' ? chinese[key] ?? english[key] : english[key] ?? key)
   .replace(/\{(\w+)\}/g, (_, key) => values[key] ?? '');
 function state(key, values = {}) { stateKey = key; stateValues = values; $('input-state').textContent = t(key, values); }
@@ -77,6 +176,8 @@ function translate() {
   $('language').lang = language === 'zh' ? 'en' : 'zh-CN';
   document.querySelector('.table-scroll').setAttribute('aria-label', t('results'));
   if (stateKey) state(stateKey, stateValues);
+  updatePreview(false); updateFolderStatus();
+  $('list-source').textContent = listName || t('dropHint');
   $('error').hidden = true;
   if (hasResults) render();
   if (reviewRow) openReview(reviewRow, false);
@@ -93,6 +194,7 @@ function detectSeparator(text) {
   return ',';
 }
 function runCheck() {
+  if (reading) return;
   clearReport();
   $('error').hidden = true; $('review').hidden = true; reviewRow = null;
   try {
@@ -103,9 +205,11 @@ function runCheck() {
     const padded = table.map(cells => Array.from({ length: width }, (_, i) => cells[i] ?? ''));
     headers = $('header').checked ? padded.shift() : Array.from({ length: width }, (_, i) => t('columnName', { number: i + 1 }));
     if ($('paths').value.length > limits.characters) throw new Error('The paths exceed 2,000,000 characters.');
+    if (!$('paths').value.trim()) throw new Error(t('needFolder'));
     const paths = $('paths').value.split(/\r?\n/).map(x => x.trim().replace(/^"(.*)"$/, '$1')).filter(Boolean);
+    if (!padded.length) throw new Error(t('noRequests'));
     rows = audit(padded, paths, $('mode').value, Number($('column').value) - 1);
-    hasResults = true; $('filter').value = 'all'; $('results').hidden = false;
+    hasResults = true; $('filter').value = rows.some(r => r.status !== 'Ready') ? 'attention' : 'all'; $('results').hidden = false;
     state(example ? 'sample' : 'checked'); render();
   } catch (error) {
     rows = []; hasResults = false; $('results').hidden = true;
@@ -120,7 +224,7 @@ function element(tag, text, className) {
 function render() {
   const counts = Object.fromEntries(['Ready', 'Missing', 'Ambiguous', 'Invalid'].map(s => [s, rows.filter(r => r.status === s).length]));
   $('summary').textContent = t('counts', { total: rows.length, ready: counts.Ready, missing: counts.Missing, ambiguous: counts.Ambiguous, invalid: counts.Invalid });
-  const filtered = rows.filter(r => $('filter').value === 'all' || r.status === $('filter').value);
+  const filtered = rows.filter(r => $('filter').value === 'all' || ($('filter').value === 'attention' ? r.status !== 'Ready' : r.status === $('filter').value));
   const visible = filtered.slice(0, 500), body = document.createDocumentFragment();
   $('visible-count').textContent = t('showing', { shown: visible.length, total: filtered.length });
   for (const row of visible) {
@@ -160,13 +264,85 @@ function renderCandidates() {
   $('confirm').disabled = !options.length;
   $('candidate-count').textContent = t('candidateCount', { shown: options.length, total: filtered.length });
 }
-function loadExample() {
-  $('checklist').value = 'file\tnote\nA001_spec.txt\tRequested by design\nA002_report.txt\tConfirm approved version\nA003_attachment.txt\tStill waiting\nguide.md\tInclude instructions\nA001_spec.txt\tRepeated request';
-  $('paths').value = 'project/A001_spec.txt\nproject/approved/A002_report.txt\nproject/draft/A002_report.txt\nproject/guide.md\nproject/A0010_unrelated.txt';
-  $('delimiter').value = 'auto'; $('column').value = '1'; $('header').checked = true; $('mode').value = 'exact';
-  example = true; runCheck();
+function updatePreview(detect = true) {
+  try {
+    const sep = $('delimiter').value === 'auto' ? detectSeparator($('checklist').value) : $('delimiter').value === 'tab' ? '\t' : ',';
+    const table = parseTable($('checklist').value, sep), guess = suggest(table);
+    const width = table.reduce((n, row) => Math.max(n, row.length), 0);
+    if (detect) $('header').checked = guess.hasHeader;
+    const selected = detect ? guess.nameColumn : Number($('column').value) - 1;
+    const names = Array.from({ length: width }, (_, i) => $('header').checked ? table[0]?.[i] || t('columnName', { number: i + 1 }) : t('columnName', { number: i + 1 }));
+    $('column').replaceChildren(...names.map((name, i) => { const el = element('option', name); el.value = String(i + 1); return el; }));
+    $('column').value = String(Math.min(Math.max(0, selected), Math.max(0, width - 1)) + 1);
+    const body = table.slice($('header').checked ? 1 : 0);
+    $('recognition').textContent = table.length ? t('recognition', { rows: body.length, column: names[Number($('column').value) - 1] }) : '';
+    const preview = document.createElement('table'), head = document.createElement('thead'), hr = document.createElement('tr');
+    for (const name of names.slice(0, 4)) { const th = element('th', name); th.scope = 'col'; hr.append(th); } head.append(hr); preview.append(head);
+    const tb = document.createElement('tbody');
+    for (const cells of body.slice(0, 4)) { const tr = document.createElement('tr'); for (const cell of cells.slice(0, 4)) tr.append(element('td', cell)); tb.append(tr); }
+    preview.append(tb); $('list-preview').replaceChildren(preview); $('list-preview').hidden = !table.length;
+  } catch { $('list-preview').hidden = true; $('recognition').textContent = ''; }
 }
-for (const id of ['checklist', 'paths', 'delimiter', 'column', 'header', 'mode']) $(id).addEventListener('input', invalidate);
+function updateFolderStatus() {
+  const count = $('paths').value.split(/\r?\n/).filter(x => x.trim()).length;
+  $('folder-status').textContent = count ? t('folderCount', { count }) : t('folderHint');
+}
+function applySheet() {
+  const sheet = workbook[Number($('sheet').value)]; if (!sheet) return;
+  const text = toText(sheet.rows);
+  if (text.length > limits.characters) throw new Error('The checklist exceeds 2,000,000 characters.');
+  $('checklist').value = text; $('delimiter').value = 'tab'; invalidate(); updatePreview(true);
+}
+function parseWorkbook(buffer) {
+  return new Promise((resolve, reject) => {
+    const worker = new Worker(new URL('./import-worker.mjs', import.meta.url), { type: 'module' });
+    const stop = () => { clearTimeout(timer); worker.terminate(); };
+    const timer = setTimeout(() => { stop(); reject(new Error(t('importError'))); }, 15000);
+    worker.onmessage = ({ data }) => { stop(); data.error ? reject(new Error(data.error)) : resolve(data.sheets); };
+    worker.onerror = () => { stop(); reject(new Error(t('importError'))); };
+    worker.postMessage(buffer, [buffer]);
+  });
+}
+async function loadFile(file) {
+  if (!file) return;
+  const serial = ++importSerial; reading = true; $('check').disabled = true; state('reading'); $('error').hidden = true;
+  try {
+    if (file.size > 16_000_000) throw new Error('Use an Excel file smaller than 16 MB.');
+    const extension = file.name.split('.').pop().toLowerCase();
+    if (!['xlsx', 'csv', 'tsv', 'txt'].includes(extension)) throw new Error(t('fileError'));
+    const buffer = await file.arrayBuffer();
+    let sheets;
+    if (extension === 'xlsx') sheets = await parseWorkbook(buffer);
+    else {
+      let text;
+      try { text = new TextDecoder('utf-8', { fatal: true }).decode(buffer); }
+      catch { text = new TextDecoder('gb18030', { fatal: true }).decode(buffer); }
+      sheets = [{ name: file.name, rows: parseTable(text, extension === 'csv' ? ',' : detectSeparator(text)) }];
+    }
+    if (serial !== importSerial) return;
+    workbook = sheets; $('sheet').replaceChildren(...sheets.map((sheet, i) => { const opt = element('option', sheet.name); opt.value = String(i); return opt; }));
+    $('sheet-label').hidden = sheets.length < 2; $('sheet').value = '0'; applySheet();
+    listName = file.name; $('list-source').textContent = listName; $('paste-panel').open = false;
+  } catch (error) { if (serial === importSerial) showError(error); }
+  finally { if (serial === importSerial) { reading = false; $('check').disabled = false; if (stateKey === 'reading') state('start'); } }
+}
+function loadExample() {
+  ++importSerial; reading = false; $('check').disabled = false; workbook = []; $('sheet-label').hidden = true;
+  const zh = language === 'zh';
+  $('checklist').value = zh ? '文件名\t备注\n合同.pdf\t归档用\n报价单.pdf\t用双方盖章版\n验收单.pdf\t项目负责人提供\n附件.txt\t设备序列号\n合同.pdf\t财务留存' : 'Filename\tNote\nContract.pdf\tArchive copy\nQuote.pdf\tUse the signed version\nAcceptance.pdf\tFrom project lead\nAttachment.txt\tEquipment serial numbers\nContract.pdf\tFinance copy';
+  $('paths').value = zh ? '客户资料/合同.pdf\n客户资料/已盖章/报价单.pdf\n客户资料/草稿/报价单.pdf\n客户资料/附件.txt' : 'Customer/Contract.pdf\nCustomer/Signed/Quote.pdf\nCustomer/Draft/Quote.pdf\nCustomer/Attachment.txt';
+  $('delimiter').value = 'tab'; $('mode').value = 'exact'; listName = t('exampleSource'); $('list-source').textContent = listName;
+  updatePreview(true); updateFolderStatus(); example = true; runCheck();
+}
+$('open-list').addEventListener('click', () => { $('list-input').value = ''; $('list-input').click(); });
+$('list-input').addEventListener('change', () => loadFile($('list-input').files[0]));
+$('sheet').addEventListener('change', () => { try { applySheet(); } catch (error) { showError(error); } });
+$('paste-toggle').addEventListener('click', () => { $('paste-panel').open = true; $('checklist').focus(); });
+$('drop-zone').addEventListener('dragover', event => { event.preventDefault(); event.dataTransfer.dropEffect = 'copy'; });
+$('drop-zone').addEventListener('drop', event => { event.preventDefault(); loadFile(event.dataTransfer.files[0]); });
+$('checklist').addEventListener('input', () => { ++importSerial; reading = false; $('check').disabled = false; listName = ''; $('list-source').textContent = t('dropHint'); workbook = []; $('sheet-label').hidden = true; invalidate(); updatePreview(true); });
+$('paths').addEventListener('input', () => { invalidate(); updateFolderStatus(); });
+for (const id of ['delimiter', 'column', 'header', 'mode']) $(id).addEventListener('change', () => { invalidate(); updatePreview(false); });
 $('check').addEventListener('click', runCheck);
 $('example').addEventListener('click', loadExample);
 $('language').addEventListener('click', () => { language = language === 'en' ? 'zh' : 'en'; translate(); });
@@ -190,7 +366,7 @@ $('folder-input').addEventListener('change', () => {
     if (files.length > limits.paths) throw new Error('The folder list exceeds 100,000 files.');
     const paths = Array.from(files, file => file.webkitRelativePath || file.name).join('\n');
     if (paths.length > limits.characters) throw new Error('The paths exceed 2,000,000 characters.');
-    $('paths').value = paths; invalidate(); state('folderLoaded', { count: files.length });
+    $('paths').value = paths; invalidate(); updateFolderStatus(); state('folderLoaded', { count: files.length });
   } catch (error) { showError(error); }
 });
 $('export').addEventListener('click', () => {
@@ -202,4 +378,4 @@ $('export').addEventListener('click', () => {
   $('report-text').value = csv; $('report').hidden = false;
   $('report').scrollIntoView({ block: 'nearest' }); $('report-text').focus();
 });
-translate(); loadExample();
+translate(); state('start');

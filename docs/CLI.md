@@ -1,6 +1,6 @@
 # Command line
 
-Windows and Linux CLI packages are in [Releases](https://github.com/qugit104/FileChecklist/releases). No .NET installation is needed for the self-contained packages. From source, use .NET SDK 9 and replace `filechecklist` below with `dotnet run --project src/FileChecklist.Cli --`.
+Windows and Linux CLI packages are in [Releases](https://github.com/qugit104/FileChecklist/releases). The packages include the .NET runtime. The CLI reads UTF-8 CSV and TSV checklists. From source, use .NET SDK 9 and replace `filechecklist` below with `dotnet run --project src/FileChecklist.Cli --`.
 
 ## Try the included files
 
@@ -12,7 +12,7 @@ filechecklist choose sample.fctask --row 2 --candidate 1
 filechecklist copy sample.fctask --yes
 ```
 
-On PowerShell, use `./filechecklist.exe` for an executable in the current directory. The sample intentionally contains a missing file, so `plan` and `copy` return exit code **2**, not 0. Candidate 1/2 is listed with its complete path; review the path before choosing. The copied source remains unchanged.
+On PowerShell, use `./filechecklist.exe` for an executable in the current directory. The sample contains one missing file, so `plan` and `copy` return exit code **2**. Candidate 1/2 is listed with its complete path; review the path before choosing. The copied source remains unchanged.
 
 Add the missing sample file under `examples/files`, then run:
 
@@ -55,4 +55,4 @@ filechecklist plan examples/ids.csv --header --source examples/files --output de
 
 `plan` writes a **new** task file; it refuses to replace an existing task. `scan`, `choose` and `copy` update the supplied task. Candidate numbers refer to the last saved scan: newly appearing files cannot silently change the selected path. A changed or vanished candidate requires another review.
 
-Task files and reports contain local paths. Review them before sharing. Matching verifies names and copy integrity, not whether the document is the correct business version.
+Task files and CSV reports include the selected file paths.

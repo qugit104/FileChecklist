@@ -11,14 +11,14 @@ body:
     id: reproduce
     attributes:
       label: Steps and expected result / 操作与预期
-      description: Include the matching mode. Replace private names and paths with fake ones.
+      description: Include the matching mode.
     validations:
       required: true
   - type: textarea
     id: example
     attributes:
       label: Minimal checklist and folder layout / 最小示例
-      description: Plain text is enough. Do not attach confidential documents or task snapshots with private paths.
+      description: Use sample filenames and paths.
   - type: textarea
     id: result
     attributes:

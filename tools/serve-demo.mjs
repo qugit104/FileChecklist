@@ -4,6 +4,9 @@ const files = new Map([
   ['/', ['../docs/index.html', 'text/html; charset=utf-8']],
   ['/web/app.mjs', ['../docs/web/app.mjs', 'text/javascript; charset=utf-8']],
   ['/web/engine.mjs', ['../docs/web/engine.mjs', 'text/javascript; charset=utf-8']],
+  ['/web/import.mjs', ['../docs/web/import.mjs', 'text/javascript; charset=utf-8']],
+  ['/web/import-worker.mjs', ['../docs/web/import-worker.mjs', 'text/javascript; charset=utf-8']],
+  ['/web/vendor/xlsx.mjs', ['../docs/web/vendor/xlsx.mjs', 'text/javascript; charset=utf-8']],
   ['/web/style.css', ['../docs/web/style.css', 'text/css; charset=utf-8']],
 ]);
 http.createServer(async (req, res) => {

@@ -1,13 +1,26 @@
 # Contributing
 
-Useful reports include a small, invented checklist and folder tree that reproduce the problem. Please remove private file paths and never attach customer files.
+For a bug report, include the version, operating system, matching mode, steps to reproduce and a small checklist with its folder layout. Use sample filenames in public issues.
 
-Before adding a matching rule, describe what should match **and what must not match**. Ambiguous candidates must remain a user decision. Do not replace an existing target or modify source files.
+## Development
 
-Use .NET SDK 9. Run `dotnet run --project tests/FileChecklist.Tests -c Release` for the core and CLI; Windows UI changes also require `powershell -NoProfile -ExecutionPolicy Bypass -File tools/test.ps1`. Include a failing behavior test for matching and copy regressions. Visual adjustments need screenshots at normal and minimum window sizes.
+Requires .NET SDK 9 and Node.js 24.
 
-Built-in Chinese strings are message keys; `src/FileChecklist.Core/English.json` holds their English translations. Use `Text.T` for plain strings and `Text.F` for interpolated messages so argument values are preserved. Desktop XAML uses the `Loc` markup extension. Do not translate user data. The UI smoke runner checks English and Chinese import, scan, selection, preview, report, restore and supplement flows.
+```powershell
+dotnet run --project tests/FileChecklist.Tests -c Release
+powershell -NoProfile -ExecutionPolicy Bypass -File tools/test.ps1
+node --test tests/web/*.test.mjs
+node tools/serve-demo.mjs
+```
 
-Keep changes focused. The first release supports local files, CSV/TSV/pasted tables, one file selected per row, and a flat destination folder. Proposals for other workflows are welcome with a concrete example.
+The PowerShell test script runs the core tests and the Windows desktop workflow in English and Chinese. Run it for desktop changes. For matching or copying fixes, include a test that reproduces the bug. Include screenshots for layout changes.
 
-For the browser companion, use Node.js 24 and run `node --test tests/web/engine.test.mjs`. Start `node tools/serve-demo.mjs` for local UI checks. Keep file contents and checklist data in the browser, and preserve the distinction between a filename match and a verified file copy. [Browser validation and limits](docs/BROWSER.md).
+## Matching and copying
+
+Matching changes need examples of accepted and rejected filenames. Ambiguous candidates require a user selection. Copying preserves source files and refuses to overwrite destination files.
+
+The browser and desktop support `.xlsx`, CSV, TSV and pasted tables. The CLI reads CSV and TSV. The desktop and CLI collect selected files into a flat output folder.
+
+## Localization
+
+Chinese strings are message keys; `src/FileChecklist.Core/English.json` contains the English translations. Use `Text.T` for strings and `Text.F` for interpolated messages. Desktop XAML uses the `Loc` markup extension. Original filenames and checklist cells remain in their input language.

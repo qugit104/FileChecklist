@@ -2,9 +2,9 @@ name: Browser checklist tests
 on:
   push:
     branches: [main]
-    paths: ['docs/index.html', 'docs/web/**', 'tests/web/**', '.github/workflows/web.yml']
+    paths: ['docs/index.html', 'docs/web/**', 'tests/web/**', 'tests/fixtures/**', '.github/workflows/web.yml']
   pull_request:
-    paths: ['docs/index.html', 'docs/web/**', 'tests/web/**', '.github/workflows/web.yml']
+    paths: ['docs/index.html', 'docs/web/**', 'tests/web/**', 'tests/fixtures/**', '.github/workflows/web.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -17,5 +17,5 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '24'
-      - run: node --test tests/web/engine.test.mjs
+      - run: node --test tests/web/*.test.mjs
       - run: node --check docs/web/app.mjs

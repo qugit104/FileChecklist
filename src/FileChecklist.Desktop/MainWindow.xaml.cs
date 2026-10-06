@@ -42,6 +42,8 @@ public partial class MainWindow : Window
         ScanButton.IsEnabled = task.Rows.Count > 0 && task.Roots.Count > 0;
         DeliverButton.IsEnabled = task.Rows.Count > 0 && task.LastScanUtc != null;
         IssuesButton.Content = F($"扫描问题 ({task.ScanErrors.Count})");
+        FolderActions.Visibility = task.Rows.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+        IssuesButton.Visibility = task.ScanErrors.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
         refreshing = false; UpdateDetails();
     }
     private static bool IsProblem(ChecklistRow r) => r.Status is RowStatus.Missing or RowStatus.Ambiguous or RowStatus.Changed or RowStatus.Error or RowStatus.Invalid;
@@ -94,7 +96,8 @@ public partial class MainWindow : Window
     private async void Scan_Click(object sender, RoutedEventArgs e) => await ScanTask();
     private async Task ScanTask()
     {
-        await Work(T("正在扫描来源目录，并核对上次交付的文件内容…"), ct => ChecklistEngine.Scan(task, ct));
+        if (await Work(T("正在扫描来源目录，并核对上次交付的文件内容…"), ct => ChecklistEngine.Scan(task, ct)))
+            FilterBox.SelectedIndex = task.Rows.Any(IsProblem) ? 1 : 0;
     }
     private async Task<bool> Work(string message, Action<CancellationToken> action)
     {
@@ -185,8 +188,8 @@ public partial class MainWindow : Window
         try{if(!File.Exists(pointer)){StatusLine.Text=T("还没有可恢复的任务。");return;}string path=File.ReadAllText(pointer);OpenTask(path);}
         catch(Exception ex){MessageBox.Show(this,ex.Message,T("恢复失败"));}
     }
-    private void Issues_Click(object sender,RoutedEventArgs e) => ShowText(T("扫描问题"), task.ScanErrors.Count==0 ? T("未记录到扫描问题。只扫描所选文件夹，不代表其他位置也已检查。") : string.Join("\n\n",task.ScanErrors));
-    private void Help_Click(object sender,RoutedEventArgs e) => ShowText(T("使用说明"), T("1. 粘贴 Excel 多列内容或导入 CSV / TSV，指定文件名列。支持完整文件名、不含扩展名和编号前缀；忽略大小写，编号候选需确认。\n\n2. 添加来源文件夹并扫描。选中清单行，可查看全部同名候选并确认使用哪个文件。重复清单行会保留。\n\n3. 选择独立的交付目录，点击“复制到目标文件夹”，预览路径后复制。不会覆盖已有文件。报告包含每一行的结果。\n\n4. 保存 .fctask 任务；文件补齐后重新打开并扫描。已交付文件通过内容校验后保留完成状态。变化的文件必须再次确认。\n\n自动恢复副本在 %LOCALAPPDATA%\\FileChecklist\\Recovery，每次操作结束保存；可从“文件”菜单选择“恢复最近任务”。手动保存的任务是当时的快照。\n\n第一版仅支持 Windows 本地普通文件夹，跳过符号链接、目录联接和云端占位文件。不判断内容是否属于正确业务版本。CSV 可用 Excel 打开；编号前导零请通过“从文本/CSV”导入并将对应列设为文本。\n\n本应用不上传文件，不需要账户。任务文件与内部报告包含完整本地路径，请只分享给需要的人。"));
+    private void Issues_Click(object sender,RoutedEventArgs e) => ShowText(T("扫描问题"), task.ScanErrors.Count==0 ? T("未发现扫描错误。") : string.Join("\n\n",task.ScanErrors));
+    private void Help_Click(object sender,RoutedEventArgs e) => ShowText(T("使用说明"), T("1. 导入清单，选择工作表和文件名列。\n\n2. 选择来源文件夹，扫描文件。\n\n3. 确认同名文件，选择交付目录，预览后复制。\n\n4. 从“文件”菜单保存任务，补件后重新扫描。\n\n匹配方式：完整文件名、不含扩展名、编号前缀。\n\n支持 .xlsx、CSV、TSV。Excel 公式使用已保存的结果。\n\n来源与交付目录需分开。符号链接和云占位文件会跳过。\n\n自动恢复目录：%LOCALAPPDATA%\\FileChecklist\\Recovery"));
     private void ShowText(string title,string text)
     {
         var window=new Window { Owner=this,Title=title,Width=740,Height=500,WindowStartupLocation=WindowStartupLocation.CenterOwner };
@@ -201,7 +204,7 @@ public partial class MainWindow : Window
         File.WriteAllText(Path.Combine(source,T("产品说明.txt")),T("产品说明：这是一份用于体验的文件。\n编号：001"));
         File.WriteAllText(Path.Combine(source,T("已确认"),T("报价单.txt")),T("本次确认报价：120 元。"));File.WriteAllText(Path.Combine(source,T("旧版本"),T("报价单.txt")),T("旧报价：100 元。"));
         File.WriteAllText(Path.Combine(source,T("使用指南.md")),T("# 使用指南\n清单交付演示。\n"));
-        task=ChecklistEngine.Import(T("文件名\t用途\t编号\n产品说明.txt\t交付客户甲\t001\n报价单.txt\t请选择确认版本\t002\n缺少的附件.txt\t等待同事补件\t003\n使用指南.md\t交付客户乙\t004\n产品说明.txt\t原清单重复行，保留记录\t005"),'\t',true,0);
+        task=ChecklistEngine.Import(T("文件名\t用途\t编号\n产品说明.txt\t客户归档\t001\n报价单.txt\t使用确认版\t002\n验收记录.txt\t项目负责人提供\t003\n使用指南.md\t随设备交付\t004\n产品说明.txt\t财务留存\t005"),'\t',true,0);
         task.Title=T("示例清单");task.Roots=[source];task.OutputFolder=Path.Combine(home,T("交付结果"));taskFile=null;recoveryId=Guid.NewGuid().ToString("N");
         FilterBox.SelectedIndex=0;SearchBox.Clear();Refresh();AutoSave();StatusLine.Text=T("示例已打开。点击“扫描文件”查找清单中的文件。");
     }
@@ -224,7 +227,12 @@ public partial class MainWindow : Window
             if(import.BuildTask().Rows[0].Cells[1]!="保留备注")throw new Exception("Import UI column mapping failed");
             import.Matching.SelectedIndex=2;if(import.BuildTask().MatchMode!=MatchMode.IdentifierPrefix)throw new Exception("Import UI match-mode selection failed");
             await Dispatcher.InvokeAsync(()=>{},DispatcherPriority.ApplicationIdle);CaptureWindow(import,Path.Combine(output,"import.png"));import.Close();
+            var excel=new ImportWindow { Owner=this };excel.Show();await excel.LoadFile(Path.Combine(AppContext.BaseDirectory,"fixtures","checklist.xlsx"));
+            if(excel.BuildTask().Rows.Count!=5 || excel.Column.SelectedIndex!=1 || excel.BuildTask().Rows[0].Cells[2]!="0007")throw new Exception("Real XLSX import controls lost rows or formatted ID");
+            await Dispatcher.InvokeAsync(()=>{},DispatcherPriority.ApplicationIdle);CaptureWindow(excel,Path.Combine(output,"import-excel.png"));
+            excel.Sheets.SelectedIndex=1;if(excel.BuildTask().Rows.Count!=2||excel.BuildTask().Rows[0].Name!="readme.txt")throw new Exception("Sheet switch lost first headerless filename");excel.Close();
             StartDemo(Path.Combine(output,"fixture")); await ScanTask();
+            if(FilterBox.SelectedIndex!=1)throw new Exception("Scan should focus on the rows needing attention");
             if(task.Rows.Count!=5||task.Rows.Count(r=>r.Status==RowStatus.Ambiguous)!=1||task.Rows.Count(r=>r.Status==RowStatus.Missing)!=1)throw new Exception("Scan UI results incorrect");
             RowsGrid.SelectedItem=((IEnumerable<RowView>)RowsGrid.ItemsSource).Single(r=>r.Row.Status==RowStatus.Ambiguous);
             await Dispatcher.InvokeAsync(()=>{},DispatcherPriority.ApplicationIdle);Capture(Path.Combine(output,"desktop.png"));

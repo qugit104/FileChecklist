@@ -11,7 +11,7 @@
     <Border DockPanel.Dock="Top" BorderBrush="{StaticResource Line}" BorderThickness="0,0,0,1" Padding="12,8">
       <DockPanel>
         <StackPanel x:Name="TopActions" DockPanel.Dock="Right" Orientation="Horizontal"><Button x:Name="DeliverButton" Content="{local:Loc '复制到目标文件夹…'}" Style="{StaticResource Primary}" Click="Deliver_Click" Margin="0" IsEnabled="False"/></StackPanel>
-        <StackPanel x:Name="ScanActions" Orientation="Horizontal"><Button Content="{local:Loc '导入清单…'}" Click="New_Click"/><Button Content="{local:Loc '打开任务…'}" Click="Open_Click"/><Button Content="{local:Loc '保存'}" Click="Save_Click"/><Border Width="1" Background="{StaticResource Line}" Margin="4,3,12,3"/><Button x:Name="ScanButton" Content="{local:Loc '扫描文件'}" Click="Scan_Click"/><Button x:Name="IssuesButton" Content="{local:Loc '扫描问题'}" Click="Issues_Click"/></StackPanel>
+        <StackPanel x:Name="ScanActions" Orientation="Horizontal"><Button Content="{local:Loc '打开 Excel 清单…'}" Click="New_Click"/><Border Width="1" Background="{StaticResource Line}" Margin="4,3,12,3"/><Button x:Name="ScanButton" Content="{local:Loc '扫描文件'}" Click="Scan_Click"/><Button x:Name="IssuesButton" Content="{local:Loc '扫描问题'}" Click="Issues_Click"/></StackPanel>
       </DockPanel>
     </Border>
     <Grid Margin="12,10,12,12">
@@ -19,7 +19,7 @@
       <Grid x:Name="FolderActions" Margin="0,0,0,10">
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions><Grid.ColumnDefinitions><ColumnDefinition Width="82"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
         <TextBlock Text="{local:Loc '查找位置'}" VerticalAlignment="Center"/><ComboBox x:Name="RootsBox" Grid.Column="1" Margin="0,0,8,6" ToolTip="{local:Loc '扫描这些文件夹及其子文件夹。'}"/>
-        <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0,0,0,6"><Button Content="{local:Loc '添加…'}" Click="AddRoot_Click"/><Button Content="{local:Loc '移除'}" Click="RemoveRoot_Click" Margin="0"/></StackPanel>
+        <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0,0,0,6"><Button Content="{local:Loc '选择文件夹…'}" Click="AddRoot_Click"/><Button Content="{local:Loc '移除'}" Click="RemoveRoot_Click" Margin="0"/></StackPanel>
         <TextBlock Grid.Row="1" Text="{local:Loc '复制到'}" VerticalAlignment="Center"/><TextBox x:Name="OutputBox" Grid.Row="1" Grid.Column="1" IsReadOnly="True" Margin="0,0,8,0"/><Button Grid.Row="1" Grid.Column="2" Content="{local:Loc '浏览…'}" Click="Output_Click" Margin="0"/>
       </Grid>
       <DockPanel Grid.Row="1" Margin="0,3,0,9">
@@ -33,7 +33,7 @@
           <DataGridTemplateColumn Header="{local:Loc '状态'}" Width="110"><DataGridTemplateColumn.CellTemplate><DataTemplate><TextBlock Text="{Binding Status}" Foreground="{Binding Ink}"/></DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn>
           <DataGridTextColumn Header="{local:Loc '原始清单'}" Binding="{Binding Original}" Width="260" ElementStyle="{StaticResource CellText}"/><DataGridTextColumn Header="{local:Loc '说明'}" Binding="{Binding Detail}" Width="*" MinWidth="180" ElementStyle="{StaticResource CellText}"/>
         </DataGrid.Columns></DataGrid>
-        <StackPanel x:Name="EmptyPanel" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20"><TextBlock Text="{local:Loc '尚未导入清单'}" FontSize="15" HorizontalAlignment="Center"/><TextBlock Text="{local:Loc '从 Excel 复制文件名列，或导入 CSV / TSV 文件。'}" Foreground="{StaticResource Muted}" Margin="0,8,0,16"/><StackPanel Orientation="Horizontal" HorizontalAlignment="Center"><Button Content="{local:Loc '导入清单…'}" Click="New_Click"/><Button Content="{local:Loc '打开示例'}" Click="Demo_Click" Margin="0"/></StackPanel></StackPanel>
+        <StackPanel x:Name="EmptyPanel" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20"><TextBlock Text="{local:Loc '导入清单'}" FontSize="24" FontWeight="SemiBold" HorizontalAlignment="Center"/><TextBlock Text="{local:Loc '支持 .xlsx、CSV、TSV'}" Foreground="{StaticResource Muted}" Margin="0,8,0,16"/><StackPanel Orientation="Horizontal" HorizontalAlignment="Center"><Button Content="{local:Loc '打开 Excel 清单…'}" Click="New_Click"/><Button Content="{local:Loc '打开示例'}" Click="Demo_Click" Margin="0"/></StackPanel></StackPanel>
       </Grid>
       <Border Grid.Row="4" Padding="0,12,0,0" x:Name="CandidatePanel" Visibility="Collapsed"><Grid>
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
