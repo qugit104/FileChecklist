@@ -27,6 +27,8 @@ Open `http://127.0.0.1:4177`. The development server exposes only the four brows
 
 Acceptance: preserve original rows and text, expose missing/ambiguous requests, require a choice for ID prefixes, invalidate results after input changes, export all rows even when filtered, and work without uploading the selected files.
 
+Browser interaction checks below ran against the local server. The deployed HTML, JavaScript and CSS were separately fetched over HTTPS and compared with the tested source; all four matched exactly.
+
 | Check | Result |
 | --- | --- |
 | Initial engine tests before implementation | FAIL: 11 of 12 failed, exit 1; the generic input-error assertion was then made specific |
@@ -40,6 +42,9 @@ Acceptance: preserve original rows and text, expose missing/ambiguous requests, 
 | Actual browser: choose the shipped sample folder | PASS: five relative paths loaded, then checked |
 | English / Chinese language switch | PASS: choices retained |
 | Layout at 1200 × 850 and 390 × 844 | PASS: desktop columns / mobile stack; no whole-page horizontal overflow |
+| Public page and all three assets | PASS: HTTP 200, correct script/style MIME types, exact content match with local tested assets |
+| GitHub Actions: browser tests / native verification / Pages deployment | PASS for commit `3054bba` |
+| Interacting with the public URL in the in-app browser | NOT VERIFIED: browser control timed out on navigation; public HTTP checks succeeded |
 | Browser CSV download completion | NOT VERIFIED: the in-app browser timed out waiting for a download event; no browser error was reported. The visible CSV text fallback was verified |
 | Native desktop / CLI local tests in this change | NOT RUN: no native code changes; see the release validation and CI |
 

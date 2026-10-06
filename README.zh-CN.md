@@ -2,7 +2,7 @@
 
 按 Excel 清单批量查找、核对和复制文件。
 
-[English](README.md) · [下载免安装版](https://github.com/qugit104/FileChecklist/releases) · [反馈问题或使用场景](https://github.com/qugit104/FileChecklist/issues/new/choose)
+[在线试用](https://qugit104.github.io/FileChecklist/?lang=zh) · [English](README.md) · [下载免安装版](https://github.com/qugit104/FileChecklist/releases) · [反馈问题或使用场景](https://github.com/qugit104/FileChecklist/issues/new/choose)
 
 Windows 本地桌面工具。粘贴文件名和备注，递归查找文件；处理重名和缺件后，预览并复制到交付目录。保留原清单的顺序、重复行与备注，每一行都有结果。
 
@@ -11,6 +11,8 @@ Windows 本地桌面工具。粘贴文件名和备注，递归查找文件；处
 适合按客户清单准备材料、整理项目附件、补交缺失文件等场景。
 
 ## 开始使用
+
+**先试用，不用安装：**[打开网页版](https://qugit104.github.io/FileChecklist/?lang=zh)，直接查看示例，或粘贴自己的清单、选择本地文件夹，核对缺件和重名并导出 CSV 报告。输入留在当前标签页，不读取文件内容。复制、校验和保存任务请使用桌面版或命令行版。[网页版限制与验证](docs/BROWSER.md)。
 
 从 Releases 下载 `FileChecklist-0.2.0-win-x64.zip`，解压后双击 `FileChecklist.exe`，无需安装 .NET。当前桌面版面向 Windows 10/11 x64；尚未逐个系统版本验证。另有 Windows / Linux 命令行版。
 

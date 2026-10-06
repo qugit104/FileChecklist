@@ -2,7 +2,7 @@
 
 Collect files from a spreadsheet checklist. See what's missing, choose between duplicates, and resume when the missing files arrive.
 
-[中文说明](README.zh-CN.md) · [Download](https://github.com/qugit104/FileChecklist/releases) · [CLI reference](docs/CLI.md) · [Report a problem](https://github.com/qugit104/FileChecklist/issues/new/choose)
+[Try in browser](https://qugit104.github.io/FileChecklist/?lang=en) · [中文说明](README.zh-CN.md) · [Download](https://github.com/qugit104/FileChecklist/releases) · [CLI reference](docs/CLI.md) · [Report a problem](https://github.com/qugit104/FileChecklist/issues/new/choose)
 
 ![Windows desktop](docs/desktop.png)
 
@@ -13,6 +13,8 @@ Someone sends you a list of 200 filenames or document IDs. The files are scatter
 FileChecklist keeps the **requested rows** as the source of truth. It retains notes and repeated requests, records missing items, and copies only confirmed files. Reopen the task later to complete the missing rows without copying everything again.
 
 ## Try it
+
+**No installation:** [open the browser tool](https://qugit104.github.io/FileChecklist/?lang=en). Try the example, paste your own checklist, or select a local folder to compare filenames. Resolve ambiguous matches and export a CSV report. Input stays in the tab; file contents are not read. Copying, SHA-256 checks and saved tasks are available in the desktop / CLI. [Browser limits](docs/BROWSER.md).
 
 **Windows desktop:** download the `FileChecklist-0.2.0-win-x64.zip` release asset, extract it, and run `FileChecklist.exe`. The interface is currently in Chinese. Choose **帮助 → 打开示例**, then **扫描文件** to try an isolated sample. No .NET installation is required.
 
